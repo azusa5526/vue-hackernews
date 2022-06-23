@@ -1,22 +1,44 @@
-import { shallowMount } from '@vue/test-utils'
+import { shallowMount, createLocalVue } from '@vue/test-utils'
+import Vuex from 'vuex'
 import ItemList from '../ItemList.vue'
 import Item from '../../components/Item.vue'
 import flushPromises from 'flush-promises'
 import { fetchListData } from '../../api/api'
 
+const localVue = createLocalVue()
+localVue.use(Vuex)
+
 jest.mock('../../api/api.js')
 
 describe('ItemList.vue', () => {
-  test('renders an Item with data for each item in window.items', async () => {
-    expect.assertions(4)
+  let storeOptions
+  let store
+
+  beforeEach(() => {
+    storeOptions = {
+      getters: {
+        displayItems: jest.fn()
+      },
+      actions: {
+        fetchListData: jest.fn(() => Promise.resolve())
+      }
+    }
+    store = new Vuex.Store(storeOptions)
+  })
+
+  test('renders an Item with data for each item in displayItems', async () => {
     const $bar = {
       start: () => {},
       finish: () => {}
     }
-    const items = [{ id: 1 }, { id: 2 }, { id: 3 }]
-    fetchListData.mockImplementationOnce(() => Promise.resolve(items))
-    const wrapper = shallowMount(ItemList, {mocks: {$bar}})
-    await flushPromises()
+    const items = [{}, {}, {}]
+    storeOptions.getters.displayItems.mockReturnValue(items)
+    const wrapper = shallowMount(ItemList, {
+      mocks: { $bar },
+      localVue,
+      store
+    })
+
     const Items = wrapper.findAll(Item)
     expect(Items).toHaveLength(items.length)
     Items.wrappers.forEach((wrapper, i) => {
@@ -29,8 +51,10 @@ describe('ItemList.vue', () => {
       start: jest.fn(),
       finish: () => {}
     }
-    shallowMount(ItemList, {mocks: { $bar }})
-    expect($bar.start).toHaveBeenCalledTimes(1)
+    shallowMount(ItemList, {mocks: { $bar },
+      localVue,
+      store})
+    expect($bar.start).toHaveBeenCalled()
   })
 
   test('calls $bar.finish when load is successful', async () => {
@@ -39,22 +63,37 @@ describe('ItemList.vue', () => {
       start: () => {},
       finish: jest.fn()
     }
-    shallowMount(ItemList, {mocks: {$bar}})
+    shallowMount(ItemList, {mocks: { $bar },
+      localVue,
+      store})
     await flushPromises()
 
     expect($bar.finish).toHaveBeenCalled()
   })
 
-  test('calls $bar.fail when load unsuccessful', async () => {
+  test('dispatches fetchListData with top', () => {
     expect.assertions(1)
     const $bar = {
       start: () => {},
-      fail: jest.fn()
+      finish: () => {}
     }
-    fetchListData.mockImplementationOnce(() => Promise.reject())
-    shallowMount(ItemList, {mocks: {$bar}})
-    await flushPromises()
-
-    expect($bar.fail).toHaveBeenCalled()
+    store.dispatch = jest.fn(() => Promise.resolve())
+    shallowMount(ItemList, { mocks: { $bar }, localVue, store })
+    expect(store.dispatch).toHaveBeenCalledWith('fetchListData', { type: 'top' })
   })
+
+  // test('calls $bar.fail when load unsuccessful', async () => {
+  //   expect.assertions(1)
+  //   const $bar = {
+  //     start: () => {},
+  //     fail: jest.fn()
+  //   }
+  //   fetchListData.mockImplementationOnce(() => Promise.reject())
+  //   shallowMount(ItemList, {mocks: { $bar },
+  //     localVue,
+  //     store})
+  //   await flushPromises()
+
+  //   expect($bar.fail).toHaveBeenCalled()
+  // })
 })
