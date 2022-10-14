@@ -1,5 +1,8 @@
 <template>
   <div class="item-list-view">
+    <span>
+      {{ $route.params.page || 1 }}/{{$store.getters.maxPage}}
+    </span>
     <div class="item-list">
       <item
         v-for="item in $store.getters.displayItems"
@@ -24,10 +27,13 @@ export default {
     loadItems () {
       this.$bar.start()
       this.$store.dispatch('fetchListData', {
-        type: 'top'
+        type: this.$route.params.type
       })
-        .then(items => {
-          this.displayItems = items
+        .then(() => {
+          if (this.$route.params.page > this.$store.getters.maxPage) {
+            this.$router.replace(`/${this.$router.params.type}/1`)
+            return
+          }
           this.$bar.finish()
         })
         .catch(() => {
