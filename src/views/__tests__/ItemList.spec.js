@@ -1,4 +1,4 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils'
+import { shallowMount, createLocalVue, RouterLinkStub } from '@vue/test-utils'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 import merge from 'lodash.merge'
@@ -36,6 +36,9 @@ describe('ItemList.vue', () => {
             type: 'top'
           }
         }
+      },
+      stubs: {
+        RouterLink: RouterLinkStub
       },
       localVue,
       store: createStore()
@@ -162,5 +165,64 @@ describe('ItemList.vue', () => {
     createWrapper({store, mocks})
     await flushPromises()
     expect(mocks.$router.replace).toHaveBeenCalledWith('/top/1')
+  })
+
+  test(('renders a RouterLink with the previous page if one exists'), () => {
+    const mocks = {
+      $route: {
+        params: {
+          page: 2
+        }
+      }
+    }
+    const wrapper = createWrapper({ mocks })
+    expect(wrapper.find(RouterLinkStub).props.to).toBe('/top/1')
+    expect(wrapper.find(RouterLinkStub).text()).toBe('< prev')
+  })
+
+  test(('renders a RouterLink with the next page if one exists'), () => {
+    const store = createStore({
+      getters: {
+        maxPage: () => 3
+      }
+    })
+    const mocks = {
+      $route: {
+        params: {
+          page: '1'
+        }
+      }
+    }
+    const wrapper = createWrapper({ store, mocks })
+    expect(wrapper.find(RouterLinkStub).props.to).toBe('/top/2')
+    expect(wrapper.find(RouterLinkStub).text()).toBe('more >')
+  })
+
+  test(('renders a RouterLink with the next page when no page param exist'), () => {
+    const store = createStore({
+      getters: {
+        maxPage: () => 3
+      }
+    })
+    const wrapper = createWrapper({ store })
+    expect(wrapper.find(RouterLinkStub).props.to).toBe('/top/2')
+    expect(wrapper.find(RouterLinkStub).text()).toBe('more >')
+  })
+
+  test(('renders an <a> element without an href f there are no previous pages'), () => {
+    const wrapper = createWrapper()
+    expect(wrapper.find('a').attributes().href).toBe(undefined)
+    expect(wrapper.find('a').text()).toBe('< prev')
+  })
+
+  test(('renders an <a> element without an href if there are no next pages'), () => {
+    const store = {
+      getters: {
+        maxPage: () => 1
+      }
+    }
+    const wrapper = createWrapper({ store })
+    expect(wrapper.findAll('a').at(1).attributes().href).toBe(undefined)
+    expect(wrapper.findAll('a').at(1).text()).toBe('more >')
   })
 })
