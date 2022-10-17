@@ -26,16 +26,13 @@ export default {
   methods: {
     loadItems () {
       this.$bar.start()
-      this.$store.dispatch('fetchListData', {
-        type: this.$route.params.type
+      this.$store.dispatch('fetchListData', {type: this.$route.params.type}).then(() => {
+        if (this.$route.params.page > this.$store.getters.maxPage) {
+          this.$router.replace(`/${this.$route.params.type}/1`)
+          return
+        }
+        this.$bar.finish()
       })
-        .then(() => {
-          if (this.$route.params.page > this.$store.getters.maxPage) {
-            this.$router.replace(`/${this.$router.params.type}/1`)
-            return
-          }
-          this.$bar.finish()
-        })
         .catch(() => {
           this.$bar.fail()
         })

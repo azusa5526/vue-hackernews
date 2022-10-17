@@ -40,6 +40,7 @@ describe('ItemList.vue', () => {
       localVue,
       store: createStore()
     }
+
     return shallowMount(ItemList, merge(defaultMountingOptions, overrides))
   }
 
@@ -141,7 +142,7 @@ describe('ItemList.vue', () => {
     expect(wrapper.text()).toContain('2/5')
   })
 
-  test(('calls $router.replace when the page parameter is greater than the max page count'), async () => {
+  test('calls $router.replace when the page parameter is greater than the max page count', async () => {
     expect.assertions(1)
     const store = createStore({
       getters: {
@@ -158,7 +159,7 @@ describe('ItemList.vue', () => {
         replace: jest.fn()
       }
     }
-    createWrapper({ mocks, store })
+    createWrapper({store, mocks})
     await flushPromises()
     expect(mocks.$router.replace).toHaveBeenCalledWith('/top/1')
   })
