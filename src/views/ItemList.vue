@@ -3,9 +3,12 @@
     <router-link v-if="$route.params.page > 1"
       :to="'/' + $route.params.type + '/' + $route.params.page - 1">&lt; prev</router-link>
     <a v-else>&lt; prev</a>
-    <span>{{$route.params.page || 1}}/{{$route.params.page - 1}}</span>
-    <router-link v-if="($route.params.page || 1) < $store.getters.maxPage"
-      :to="'/' + $route.params.type + '/' + ((Number($route.params.page) || 1) + 1)">more &gt;</router-link>
+    <span>{{$route.params.page || 1}}/{{$store.getters.maxPage}}</span>
+      <router-link
+        v-if="($route.params.page || 1) < $store.getters.maxPage"
+        :to="'/' +  $route.params.type + '/' + ((Number($route.params.page) || 1) + 1)">
+          more &gt;
+      </router-link>
     <a v-else>more &gt;</a>
 
     <div class="item-list">

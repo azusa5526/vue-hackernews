@@ -171,7 +171,7 @@ describe('ItemList.vue', () => {
     const mocks = {
       $route: {
         params: {
-          page: 2
+          page: '2'
         }
       }
     }
