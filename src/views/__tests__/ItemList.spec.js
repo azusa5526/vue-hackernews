@@ -176,7 +176,7 @@ describe('ItemList.vue', () => {
       }
     }
     const wrapper = createWrapper({ mocks })
-    expect(wrapper.find(RouterLinkStub).props.to).toBe('/top/1')
+    expect(wrapper.find(RouterLinkStub).props().to).toBe('/top/1')
     expect(wrapper.find(RouterLinkStub).text()).toBe('< prev')
   })
 
@@ -194,7 +194,7 @@ describe('ItemList.vue', () => {
       }
     }
     const wrapper = createWrapper({ store, mocks })
-    expect(wrapper.find(RouterLinkStub).props.to).toBe('/top/2')
+    expect(wrapper.find(RouterLinkStub).props().to).toBe('/top/2')
     expect(wrapper.find(RouterLinkStub).text()).toBe('more >')
   })
 
@@ -205,7 +205,7 @@ describe('ItemList.vue', () => {
       }
     })
     const wrapper = createWrapper({ store })
-    expect(wrapper.find(RouterLinkStub).props.to).toBe('/top/2')
+    expect(wrapper.find(RouterLinkStub).props().to).toBe('/top/2')
     expect(wrapper.find(RouterLinkStub).text()).toBe('more >')
   })
 
